@@ -58,6 +58,16 @@ Source datasets: The public datasets can be found here: https://www.batteryarchi
 이번에 from ydata_profiling import ProfileReport를 처음알게 되었는데 정말 데이터분석할때 좋은거 같다. 
 > pip install ydata_profiling
 
+## 결과 
+
+Test set
+
+- acc: 0.9914
+- MAE: 15.211303624104506
+- MAPE: 0.18917974828328413
+
+![image](https://github.com/khw11044/Iron-CCM-RUL/assets/51473705/a6b23886-d9ab-4e8b-8189-d1fb60d3bd46)
+
 [원본 깃헙 주소](https://github.com/ignavinuales/Battery_RUL_Prediction/tree/main)
 
 [마이크로소프트 BatteryML](https://github.com/microsoft/BatteryML/tree/main)
