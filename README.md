@@ -12,16 +12,17 @@
 ### 변수들 
 
 - Cycle Index: number of cycle
-- F1: Discharge Time (s)
-- F2: Time at 4.15V (s)
-- F3: Time Constant Current (s)
-- F4: Decrement 3.6-3.4V (s)
-- F5: Max. Voltage Discharge (V)
-- F6: Min. Voltage Charge (V)
-- F7: Charging Time (s)
-- Total time (s)
+- F1: Discharge Time (s) -> 최소 전압에 도달하는 시간 (방전 시간).
+- F2: Time at 4.15V (s) -> 전압이 4.15V에 도달하는 시간.
+- F3: Time Constant Current (s) -> 전류가 최대값으로 일정하게 유지되는 시간.
+- F4: Decrement 3.6-3.4V (s) -> 전압이 3.6V에서 3.4V로 감소하는 데 필요한 시간.
+- F5: Max. Voltage Discharge (V) -> 전압의 초기값과 최대값.
+- F6: Min. Voltage Charge (V) -> 전압의 초기(최소) 값.
+- F7: Charging Time (s) -> 전체 충전 시간 
+- Total time (s) 
 - RUL: target
 
+여기서 RUL은 remaining-useful-life cycles이다. 하나의 완전한 사이클은 전체 충전 및 방전이다. 즉, RUL이 80이면 배터리는 80 사이클 이상 지속될 것으로 예상한다는 뜻이다.
 
 ## Objectve
 
@@ -58,15 +59,43 @@ Source datasets: The public datasets can be found here: https://www.batteryarchi
 이번에 from ydata_profiling import ProfileReport를 처음알게 되었는데 정말 데이터분석할때 좋은거 같다. 
 > pip install ydata_profiling
 
-## 결과 
+
+## 데이터셋 분석 
+
+![image](https://github.com/khw11044/Battery_RUL/assets/51473705/847398c2-6945-46c3-bccb-c4d5d9bc57c2)
+
+![image](https://github.com/khw11044/Battery_RUL/assets/51473705/97c7359b-4f70-4d82-988a-c417cc8e5b6e)
+
+![image](https://github.com/khw11044/Battery_RUL/assets/51473705/6a46555d-1722-4deb-8d61-ce25b0d3e401)
+
+## ML 결과 
 
 Test set
 
-- acc: 0.9914
-- MAE: 15.211303624104506
-- MAPE: 0.18917974828328413
+![image](https://github.com/ignavinuales/Battery_RUL_Prediction/assets/51473705/5d97d951-7693-44c3-ad9a-ba80add170d7)
+
+RandomForestRegressor
+
+- acc: 0.9913
+- RMSE : 29.975473132963696
+- MAE  : 15.304969420021964
+- MAPE : 0.18772798208130972
+- R2 : 0.9913132950785044
 
 ![image](https://github.com/khw11044/Iron-CCM-RUL/assets/51473705/a6b23886-d9ab-4e8b-8189-d1fb60d3bd46)
+
+## DL 결과 
+
+![image](https://github.com/ignavinuales/Battery_RUL_Prediction/assets/51473705/a280f935-89c7-4fc8-b92a-392ccde4c224)
+
+- RMSE : 61.69550065151493
+- MAE  : 46.079332333534644
+- MAPE : 1827158615447511.2
+- R2 : 0.9632015131060703
+
+![image](https://github.com/ignavinuales/Battery_RUL_Prediction/assets/51473705/67350868-5590-4e93-b693-982926bb374a)
+
+____________
 
 [원본 깃헙 주소](https://github.com/ignavinuales/Battery_RUL_Prediction/tree/main)
 
