@@ -68,6 +68,8 @@ Source datasets: The public datasets can be found here: https://www.batteryarchi
 
 ![image](https://github.com/khw11044/Battery_RUL/assets/51473705/6a46555d-1722-4deb-8d61-ce25b0d3e401)
 
+RUL_metric : RUL 예측값과 실제 RUL 값과의 차이가 100이하면 옳게 예측한것으로 측정한다.
+
 ## ML 결과 
 
 Test set
@@ -76,11 +78,11 @@ Test set
 
 RandomForestRegressor
 
-- acc: 0.9913
 - RMSE : 29.975473132963696
 - MAE  : 15.304969420021964
 - MAPE : 0.18772798208130972
 - R2 : 0.9913132950785044
+- RUL_metric : 0.9871279163314561
 
 ![image](https://github.com/khw11044/Iron-CCM-RUL/assets/51473705/a6b23886-d9ab-4e8b-8189-d1fb60d3bd46)
 
@@ -92,8 +94,9 @@ RandomForestRegressor
 - MAE  : 46.079332333534644
 - MAPE : 1827158615447511.2
 - R2 : 0.9632015131060703
+- RUL_metric : 0.9519308125502816
 
-![image](https://github.com/ignavinuales/Battery_RUL_Prediction/assets/51473705/67350868-5590-4e93-b693-982926bb374a)
+![image](https://github.com/khw11044/MY_GOAD/assets/51473705/765aa795-41c2-417a-a056-333e8d6c1ae7)
 
 ____________
 
