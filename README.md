@@ -98,6 +98,7 @@ RandomForestRegressor
 
 ![image](https://github.com/khw11044/MY_GOAD/assets/51473705/765aa795-41c2-417a-a056-333e8d6c1ae7)
 
+![training_100](https://github.com/khw11044/Battery_RUL/assets/51473705/cfb47355-7ce2-44e4-94f2-efb03a5faa0d)
 ____________
 
 [원본 깃헙 주소](https://github.com/ignavinuales/Battery_RUL_Prediction/tree/main)

@@ -11,16 +11,24 @@ import seaborn as sns
 from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import * 
+import warnings
+warnings.filterwarnings("ignore")
 
 sns.set()
 
 # Hyperparameters
-batch_size = 32
+batch_size = 64
 input_size = 3
-hidden_size = 10
+hidden_size = 16
 num_classes = 1             # 회귀 문제 
-learning_rate = 0.001
-epochs = 50
+learning_rate = 0.1
+epochs = 100
+
+def RUL_metric(y_valid, y_pred, threshold=10):
+    error = y_valid.reshape(-1) - y_pred.reshape(-1)
+    per = np.where(error<=threshold, 1, 0)
+    return sum(per) / len(per)
 
 class Pipeline:
     def __init__(self, scalar):
@@ -28,22 +36,21 @@ class Pipeline:
     
     def fit(self, X, y):
         X = self.scalar.fit_transform(X)
-        return X, y
+        return X, y.to_numpy(dtype=np.float32)
     
     def transform(self, X, y):
         X = self.scalar.transform(X)
-        return X, y
+        return X, y.to_numpy(dtype=np.float32)
 
 class BatteryDataSet(Dataset):
 
-    def __init__(self, dataset):
+    def __init__(self, X,y):
         # Data loading
-        self.x = torch.from_numpy(dataset[:, :-1])
-        self.y = torch.from_numpy(dataset[:, [-1]])
-        # X = dataset.drop(['RUL'], axis=1)
-        # y = dataset['RUL']
         # self.x = torch.from_numpy(X)
         # self.y = torch.from_numpy(y)
+        self.x = torch.FloatTensor(X)
+        self.y = torch.FloatTensor(y)
+        
         self.n_samples = self.x.shape[0]
 
     def __getitem__(self, index):
@@ -57,14 +64,10 @@ class BatteryDataSet(Dataset):
 def classifyer(train_dataset, valid_dataset, test_dataset, batch_size, shuffle_dataset=False):
 
     # get the dataset size
-    train_dataset_len = len(train_dataset)
-    valid_dataset_len = len(valid_dataset)
-    test_dataset_len = len(test_dataset)
-
     # get the indices
-    train_indices = list(range(train_dataset_len))
-    valid_indices = list(range(valid_dataset_len))
-    test_indices = list(range(test_dataset_len))
+    train_indices = list(range(len(train_dataset)))
+    valid_indices = list(range(len(valid_dataset)))
+    test_indices = list(range(len(test_dataset)))
 
     # percentage share of data set
     # train:        ~ 70 %
@@ -93,37 +96,12 @@ def classifyer(train_dataset, valid_dataset, test_dataset, batch_size, shuffle_d
     return (train_loader, valid_loader, test_loader)
 
 
-# class NeuralNet(nn.Module):
-#     def __init__(self, input_size, hidden_size, num_classes):
-#         super(NeuralNet, self).__init__()
-#         self.l1 = nn.Linear(input_size, hidden_size)
-#         self.relu = nn.ReLU()
-#         self.l2 = nn.Linear(hidden_size, 50)
-#         self.relu = nn.ReLU()
-#         self.l3 = nn.Linear(50, 20)
-#         self.relu = nn.ReLU()
-#         self.l4 = nn.Linear(20, 5)
-#         self.relu = nn.ReLU()
-#         self.l5 = nn.Linear(5, num_classes)
-
-#     def forward(self, x):
-#         out = self.l1(x)
-#         out = self.relu(out)
-#         out = self.l2(out)
-#         out = self.relu(out)
-#         out = self.l3(out)
-#         out = self.relu(out)
-#         out = self.l4(out)
-#         out = self.relu(out)
-#         out = self.l5(out)
-#         return out
-
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(NeuralNet, self).__init__()
-        self.l1 = nn.Linear(input_size, 16)
+        self.l1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.l5 = nn.Linear(16, num_classes)
+        self.l5 = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
         out = self.l1(x)
@@ -132,96 +110,80 @@ class NeuralNet(nn.Module):
         return out
 
 # Training function
-def train_loop(epoch, train_loader, model, loss_fn, optimizer):
-    size = len(train_loader)
-    with tqdm(train_loader) as pbar :
-        for batch, (features, RUL) in enumerate(pbar):
-            # Forward path
-            outputs = model(features)           # ([32, 6])
-            loss = loss_fn(outputs, RUL)
-
-            # Backwards path
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            
-            loss, current = loss.item(), batch*len(features)
-            pbar.set_postfix({'loss' : "{loss:>7f}"})
-
-    print('===> Epoch [{}] : loss : {:.5}'.format(epoch,  loss))
-
-# Test function
-def val_loop(epoch, dataloader, model, loss_fn):
-    num_batches = len(dataloader)
-    test_loss = 0
-
-    diff_list = []
-    targets_list = []
-    pred_list = []
-
-    with torch.no_grad():
-        for X, y in dataloader:
-            pred = model(X)
-            test_loss += loss_fn(pred, y).item()
-
-            # Difference between prediction and target
-            diff = abs(y - pred) / y
-            diff = diff.numpy()
-            mean_diff = np.mean(diff)
-            diff_list.append(mean_diff)
-
-            # # Target vs prediction
-            pred_np = pred.squeeze().tolist()
-            target_np = y.squeeze().tolist()
-
-            try:
-                for i in pred_np:
-
-                    pred_list.append(i)
-                for i in target_np:
-                    targets_list.append(i)
-            except:
-                pass
-
-    # Average loss
-    test_loss /= num_batches
-    scheduler.step(test_loss)
+def train_loop(epoch, model, criterion, optimizer):
+    size = len(X_train_s)
+    optimizer.zero_grad()
+    outputs = model(X_train_s)
+    loss = criterion(outputs, y_train_s)
+    loss.backward()
+    optimizer.step()
+    print(f'Epoch : {epoch} / AVG train loss : {loss.item()/size}')
+    train_loss_list.append(loss.item()/size)
     
-    # Average difference
-    difference_mean = np.mean(diff_list)
+# Test function
+def val_loop(epoch, model, scheduler):
+    
+    with torch.no_grad():
+        size = len(X_val_s)
+        pred = model(X_val_s)
+        test_loss = criterion(pred, y_val_s)
+        
+        test_loss_list.append(test_loss.item()/size)
+        pred_np = pred.squeeze().tolist()
+        target_np = y_val_s.squeeze().tolist()
+        
+        try:
+            for i,j in zip(pred_np,target_np):
+                pred_list.append(i)
+                targets_list.append(j)
+        except:
+            pass
+        
+        pred = pred.detach().cpu().numpy()
+        y = y_val_s.detach().cpu().numpy()
+    
+        RMSE = mean_squared_error(y, pred, squared=False)
+        MAE = mean_absolute_error(y, pred)
+        MAPE = mean_absolute_percentage_error(y, pred)
+        R2 = r2_score(y, pred)
+        RUL_score = RUL_metric(y, pred, threshold=100)
+        msg = f"Test: \n Avg loss: {test_loss.item()/size:>8f}, \n"
+        print(msg) 
+        msg = f"- RMSE: {(RMSE):>0.2f}, - MAE: {(MAE):>0.2f}, - MAPE: {(MAPE):>0.2f},  - R2: {(R2):>0.2f},  - RUL_metric: {(RUL_score):>0.2f}, \n"
+        print(msg)
+        print('---'*20)
+        
+        scheduler.step(test_loss)
 
-    # Print the average difference and average loss
-    print(f"Test: \n Avg Difference: {(100*difference_mean):>0.2f}%, Avg loss: {test_loss:>8f} \n")
-
-    # Minimum difference and its epoch
-    min_diff_dict[epoch+1] = (difference_mean*100)
-    min_diff_value = min(min_diff_dict.items(), key=lambda x:x[1])
-    print("LOWEST DIFFERENCE AND EPOCH:")
-    print(f"Epoch: {min_diff_value[0]}, diff: {min_diff_value[1]:>0.2f}%")
-
-    # PLOT Target vs Prediction
-    # if t % 10 == 0:
-
-    # plt.rcParams["figure.dpi"] = 600
-    plt.figure(figsize=(12,8))
-    plt.subplot(2,1,1)
+    epoch_list.append(epoch)
+    MAE_list.append(MAE)
+    RUL_score_list.append(RUL_score*100)
+    plt.figure(figsize=(10,8))
+    plt.subplot(3,1,1)
     plt.scatter(targets_list, pred_list)
     plt.xlabel('Target', fontsize=10)
     plt.ylabel('Prediction', fontsize=10)
     plt.ylim(0, 1300)
     plt.title(f"Epoch {epoch+1}", fontsize=13)
-    # plt.show()
 
+    plt.subplot(3,1,2)
+    # plt.scatter(epoch_list, MAE_list)
+    plt.plot(MAE_list, label='RUL_score', marker = '.')
+    plt.ylim(0, 1000)
+    plt.xlabel('Epoch')
+    plt.ylabel('Target-Pred MAE')
 
     # PLOT Difference
-    plt.subplot(2,1,2)
-    plt.scatter(epoch, difference_mean*100)
-    plt.ylim(0, 70)
+    plt.subplot(3,1,3)
+    # plt.scatter(epoch_list, RUL_score_list)
+    plt.plot(RUL_score_list, label='RUL_score', marker = '.')
+    plt.ylim(0, 100)
     plt.xlabel('Epoch')
-    plt.ylabel('Target-Pred Difference (%)')
-    plt.scatter(epoch, test_loss)
-    plt.savefig(f'./result/training_{epoch+1}.png')
+    plt.ylabel('Target-Pred RUL_score (%)')
+    # plt.scatter(epoch, test_loss)
+    plt.tight_layout()
+
+    plt.savefig(f'./result/training_{epoch}.png')
 
 
 if __name__ == "__main__":
@@ -230,49 +192,56 @@ if __name__ == "__main__":
     path = "data/Battery_RUL.csv"
     data = pd.read_csv(path)
     data=data.drop(['Cycle_Index','Discharge Time (s)', 'Decrement 3.6-3.4V (s)', 'Time constant current (s)','Charging time (s)'],axis=1)
+    # RUL이 0인 값은 비정상 데이터로 빼버린다.
+    data = data[data['RUL']!=0]
     X = data.drop(['RUL'], axis=1)
     y = data['RUL']
-    input_size = X.shape[1]
+    
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=2023, shuffle =True)
+    X_val, X_test, y_val, y_test = train_test_split(X_val, y_val, test_size=0.2, random_state=2023, shuffle =True)
+
     scaler = RobustScaler()
     pipeline = Pipeline(scaler)
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, shuffle =False)
-    X_val, X_test, y_val, y_test = train_test_split(X_val, y_val, test_size=0.2, shuffle =False)
     
     X_train_s, y_train_s = pipeline.fit(X_train, y_train)
     X_val_s, y_val_s = pipeline.transform(X_val, y_val)
     X_test_s, y_test_s = pipeline.transform(X_test, y_test)
-    
-    train_dataset = pd.DataFrame(X_train_s).join(y_train_s).to_numpy(dtype=np.float32)
-    valid_dataset = pd.DataFrame(X_val_s).join(y_val_s).to_numpy(dtype=np.float32)
-    test_dataset = pd.DataFrame(X_test_s).join(y_test_s).to_numpy(dtype=np.float32)
-    
-    # Load dataset
-    train_dataset = BatteryDataSet(train_dataset)
-    valid_dataset = BatteryDataSet(valid_dataset)
-    test_dataset = BatteryDataSet(test_dataset)
 
-    # Train and test loader
-    train_loader, valid_loader, test_loader = classifyer(train_dataset, valid_dataset, test_dataset, 
-                                           batch_size=batch_size, shuffle_dataset=True)
-    # Init model
+    X_train_s = torch.FloatTensor(X_train_s)
+    y_train_s = torch.FloatTensor(y_train_s).unsqueeze(-1)
+
+    X_val_s = torch.FloatTensor(X_val_s)
+    y_val_s = torch.FloatTensor(y_val_s).unsqueeze(-1)
+
+    X_test_s = torch.FloatTensor(X_test_s)
+    y_test_s = torch.FloatTensor(y_test_s).unsqueeze(-1)
+
+    input_size =  X_train_s.shape[1] #num of columns
+    hidden_size = 16
+    num_classes = 1
     model = NeuralNet(input_size, hidden_size, num_classes)
 
     # Loss function
-    loss_fn = nn.MSELoss()  # nn.L1Loss()       # nn.MSELoss()->L2loss
-
-    # Optimizer
+    criterion = nn.MSELoss()  # nn.L1Loss()       # nn.MSELoss()->L2loss
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  # Adam
     scheduler = ReduceLROnPlateau(optimizer, 'min')
 
-    # Auxiliary dictionary to store epochs and difference values:
+    train_loss_list = []
+    test_loss_list = []
     min_diff_dict = {}
 
-    for epoch in range(epochs):
+    targets_list = []
+    pred_list = []
+    epoch_list = []
+    MAE_list= []
+    RUL_score_list = []
+
+    for epoch in tqdm(range(epochs)):
         print(f"Epoch {epoch+1}\n-------------------------------")
 
-        train_loop(epoch, train_loader, model, loss_fn, optimizer)
+        train_loop(epoch, model, criterion, optimizer)
 
-        val_loop(epoch, valid_loader, model, loss_fn)
+        val_loop(epoch, model, scheduler)
 
     print("Fertig!")
 
