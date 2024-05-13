@@ -88,7 +88,8 @@ RandomForestRegressor
 
 ## DL 결과 
 
-![image](https://github.com/ignavinuales/Battery_RUL_Prediction/assets/51473705/a280f935-89c7-4fc8-b92a-392ccde4c224)
+![image](https://github.com/khw11044/MY_GOAD/assets/51473705/2ff7b5bd-b12c-432e-9587-5cdf98ad8e30)
+
 
 - RMSE : 61.69550065151493
 - MAE  : 46.079332333534644
@@ -96,9 +97,10 @@ RandomForestRegressor
 - R2 : 0.9632015131060703
 - RUL_metric : 0.9519308125502816
 
-![image](https://github.com/khw11044/MY_GOAD/assets/51473705/765aa795-41c2-417a-a056-333e8d6c1ae7)
+![image](https://github.com/khw11044/MY_GOAD/assets/51473705/c8d9316a-6a92-4c6d-b0f4-97fb6237e8ec)
 
-![training_100](https://github.com/khw11044/Battery_RUL/assets/51473705/cfb47355-7ce2-44e4-94f2-efb03a5faa0d)
+![image](https://github.com/khw11044/MY_GOAD/assets/51473705/7496c735-e804-46b7-a383-69c69ea2e241)
+
 ____________
 
 [원본 깃헙 주소](https://github.com/ignavinuales/Battery_RUL_Prediction/tree/main)
