@@ -85,6 +85,7 @@ RandomForestRegressor
 - R2 : 0.9915265305813719
 - PCR@100 (Percentage of Collect RUL) : 0.9871279163314561
 
+
 ![image](https://github.com/khw11044/Iron-CCM-RUL/assets/51473705/a6b23886-d9ab-4e8b-8189-d1fb60d3bd46)
 
 ## DL 결과 
@@ -97,6 +98,7 @@ RandomForestRegressor
 - MAPE : 1827158615447511.2
 - R2 : 0.9632015131060703
 - PCR@100 (Percentage of Collect RUL) : 0.9519308125502816
+
 
 ![image](https://github.com/khw11044/MY_GOAD/assets/51473705/c8d9316a-6a92-4c6d-b0f4-97fb6237e8ec)
 
