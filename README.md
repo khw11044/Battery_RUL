@@ -82,7 +82,7 @@ RandomForestRegressor
 - MAE  : 15.304969420021964
 - MAPE : 0.18772798208130972
 - R2 : 0.9913132950785044
-- RUL_metric : 0.9871279163314561
+- PCR (Percentage of Correct RUL) : 0.9871279163314561
 
 ![image](https://github.com/khw11044/Iron-CCM-RUL/assets/51473705/a6b23886-d9ab-4e8b-8189-d1fb60d3bd46)
 
@@ -95,7 +95,7 @@ RandomForestRegressor
 - MAE  : 46.079332333534644
 - MAPE : 1827158615447511.2
 - R2 : 0.9632015131060703
-- RUL_metric : 0.9519308125502816
+- PCR (Percentage of Correct RUL) : 0.9519308125502816
 
 ![image](https://github.com/khw11044/MY_GOAD/assets/51473705/c8d9316a-6a92-4c6d-b0f4-97fb6237e8ec)
 
